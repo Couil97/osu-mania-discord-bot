@@ -1,0 +1,19 @@
+{
+  "name": "mania-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for the game osu!mania",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@seald-io/nedb": "^4.0.4",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
+    "osu-classes": "^3.0.1",
+    "osu-mania-stable": "^5.0.0",
+    "osu-parsers": "^4.1.6"
+  }
+}

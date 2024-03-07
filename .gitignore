@@ -1,0 +1,8 @@
+# dotenv environment variables file
+.env
+.env.test
+beatmaps/
+db/
+files/
+node_modules/
+old_index.js
