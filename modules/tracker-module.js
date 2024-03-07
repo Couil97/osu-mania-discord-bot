@@ -77,7 +77,7 @@ async function checkUserWait(user) {
     if(user.wait <= 0) {
         let user_info = await getUser({user_id: user.id});
         
-        let time_since = Date.now() - Date.parse(user.last_visit);
+        let time_since = Date.now() - (user.session.activation_time || 0);
 
         time_since /= 1000;                                 // Seconds
         time_since /= 60;                                   // Minutes
@@ -128,6 +128,7 @@ async function tracker(user) {
 
     if(!user.session.active) {
         user.session.active = true;
+        user.session.activation_time = Date.now();
     }
 
     user.session.global_rank -= user.statistics.global_rank - user.current.global_rank;
