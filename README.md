@@ -1,5 +1,5 @@
 # osu!mania botter
-A discord-bot for the osu! gamemode mania. Capable of displaying online scores, storing unranked scores and tracking user (+ more)
+A discord-bot for the osu! gamemode mania. Capable of displaying online scores, storing unranked scores and tracking users (+ more)
 
 Requirements: 
 1. [Node](https://nodejs.org/en)
