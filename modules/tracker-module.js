@@ -207,7 +207,7 @@ async function tracked_score(activity, user) {
     let dan_text = '', pb_text = '', tracker_text = '';
 
     if(dan.is_dan && dan.passed) dan_text = '\n> ```Passed ' + dan.name + '!```';
-    if(personal_best) pb_text = "\n> ```Improvment: " + (personal_best.score_diff > 0 ? '+' + toComma(personal_best.score_diff) : '-' + toComma(personal_best.score_diff)) + ' score, ' + (personal_best.accuracy_diff > 0 ? '+' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2) : '-' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2)) + '% ```';
+    if(personal_best) pb_text = "\n> ```Improvment: " + (personal_best.score_diff > 0 ? '+' + toComma(personal_best.score_diff) : '' + toComma(personal_best.score_diff)) + ' score, ' + (personal_best.accuracy_diff > 0 ? '+' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2) : '' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2)) + '% ```';
 
     if(type == 'ranked') {
         let pp_diff = (user.statistics.pp - user.current.pp).toFixed(2);
