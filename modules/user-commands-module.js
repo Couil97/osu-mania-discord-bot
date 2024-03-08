@@ -1,4 +1,4 @@
-const { findUR, getPosition } = require("./database-module");
+const { findUR } = require("./database-module");
 const { sendMsg, getArgs, addToMsgStack, getMsgStack, truncate } = require("./helper-cmds-module");
 const { performanceCalc, accuracyCalc } = require("./mania-calc-module");
 const { getActivity, getBeatmapAttributes, getUserScores, getUserFromDatabase, getBeatmap, needAttributes, addBestToDatabase, getUserPlays, getRanking } = require("./osu-api-module");
@@ -200,7 +200,7 @@ async function _activity(message, type) {
             activity: null,
             type: type,
         }, message.channel.id, `!${type.substring(0,1)}`);
-    
+
         if(!args) return 0;
     
         cursor = args.cursor;
@@ -347,13 +347,12 @@ async function _leaderboard(message) {
     
         if(!args) return 0;
 
-        let beatmap_id = args.beatmap_id;
+        let beatmap_id = parseInt(args.beatmap_id);
 
         let plays = [];
 
-        if(mods) plays = await findUR({map_id: beatmap_id, mods: mods});
-        else plays = await findUR({map_id: beatmap_id});
-
+        //if(mods.length > 0) plays = await findUR({map_id: beatmap_id, mods: mods});
+        plays = await findUR({ map_id: beatmap_id });
         let scores_amt = plays.length;
 
         if(plays.length == 0) {
@@ -408,7 +407,7 @@ async function _leaderboard(message) {
 
             let row_space = 36;
 
-            let mods = '+' + play.mods.join('');
+            let mods = '+' + play.mods.join('') + ' ';
             if(play.mods.length == 0) mods = '';
             let score = String(play.score).substring(0, 3);
             if(score == 1000000) score = '1000';
@@ -416,7 +415,7 @@ async function _leaderboard(message) {
             if(accuracy == 100) accuracy = '100.0';
             
             row_space -= 8;                                     //_99.99%_
-            if(mods.length) row_space -= 1 + mods.length        //_+DTMR
+            if(mods.length) row_space -= mods.length            //_+DTMR
             row_space -= 1 + score.length;                      //_999k _1000k
             row_space -= 1 + (highest_pp.length + 2);           //_1000pp
 

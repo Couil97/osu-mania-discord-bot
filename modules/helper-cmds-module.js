@@ -162,6 +162,9 @@ function getArgs(message) {
                     options.beatmap_id = arg.split('beatmapsets/')[1]
                     }
                 }
+                else {
+                    options.beatmap_id = arg.split('beatmaps/')[1];
+                }
             } else if (arg.charAt(0) == '+') {
                 options.mods = arg.toUpperCase();
                 options.mods = options.mods.substring(1, options.mods.length).match(/.{1,2}/g);
@@ -183,6 +186,7 @@ function getArgs(message) {
     // Fail-safes
     if(options.percent > 100) options.percent = 100;
     if(options.number.length == 1) options.number = options.number[0];
+    if(options.number.length == 0) options.number = 0
     if(options.number < 0) options.number = 0;
 
 

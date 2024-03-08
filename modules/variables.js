@@ -49,7 +49,7 @@ function getApiUsageCount() {
 const api_retry_rate = 5000;
 
 // osu!tracker rate
-const tracker_rate = 10 * 1000;
+const tracker_rate = 2 * 1000;
 
 // Tracker wait cycle (hours)
 const wait_cycle = 6;
