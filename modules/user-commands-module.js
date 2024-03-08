@@ -350,9 +350,9 @@ async function _leaderboard(message) {
         let beatmap_id = parseInt(args.beatmap_id);
 
         let plays = [];
-
+        
         if(mods.length > 0) plays = await findUR({ map_id: beatmap_id, mods: mods });
-        plays = await findUR({ map_id: beatmap_id });
+        else plays = await findUR({ map_id: beatmap_id });
         let scores_amt = plays.length;
 
         if(plays.length == 0) {

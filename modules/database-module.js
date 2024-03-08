@@ -1,6 +1,7 @@
 // Database of unranked and ranked scores
 const Datastore = require('@seald-io/nedb');
 const { getUserbase } = require('./variables');
+const { arraysEqual } = require('./helper-cmds-module');
 const UR = new Datastore({ filename: `./db/UR.db` })
 
 //Initalizes the DBs
@@ -13,11 +14,65 @@ function initializeDatabase() {
                 console.log('Indexing database..')
                 await UR.ensureIndexAsync({ fieldName: 'map_id' });
                 await UR.ensureIndexAsync({ fieldName: 'user_id' });
+                await removeDuplicates();
                 console.log('Database loaded!')
                 resolve();
             }
         });
     })
+}
+
+function fastSearch(array, element, start, end) {
+    start--;
+    while (++start < end) {
+        if (array[start].map_id === element.map_id) {
+            if(arraysEqual(element.mods, array[start].mods)) return true;
+        }
+    }
+
+    return false;
+}
+
+async function removeDuplicates() {
+    console.log('Removing duplicates..');
+
+    let counter = 0;
+    let users = [];
+
+    let items = await findUR({});
+    for(let item of items) {
+        let i = -1;
+        let flag = true;
+        
+        while(++i < users.length) {
+            if(item.user_id === users[i]) {
+                flag = false;
+                break;
+            }
+        }
+
+        if(flag) users.push(item.user_id);
+    }
+
+    for(let user of users) {
+        let plays = await findUR({ user_id: user });
+
+        plays.sort((a,b) => b.pp - a.pp);
+        let seen_plays = [];
+
+        for(let play of plays) {
+            let flag = fastSearch(seen_plays, play, 0, seen_plays.length);
+
+            if(flag) {
+                await UR.removeAsync({ _id: play._id }, {});
+                counter++;
+            } else {
+                seen_plays.push({map_id: play.map_id, mods: play.mods});
+            }
+        }
+    }
+
+    console.log(`Duplicates removed: ${counter}`);
 }
 
 async function findUR(query, projection, limit, sort) {

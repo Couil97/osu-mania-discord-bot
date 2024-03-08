@@ -262,6 +262,18 @@ function truncate(str, limit) {
     return str.slice(0, limit - 2) + '..';
 }
 
+// Checks if arrays are equal
+function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
 module.exports = {
     delay: delay,
     getIcon: getIcon,
@@ -278,5 +290,5 @@ module.exports = {
     getMsgStack: getMsgStack,
     replaceNumbers: replaceNumbers,
     truncate: truncate,
-
+    arraysEqual: arraysEqual,
 }
