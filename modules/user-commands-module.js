@@ -329,7 +329,7 @@ async function _compare(message) {
  * @param {String} username - Username (optional)
  * 
 */
-async function _leaderboard(message) {    
+async function _leaderboard(message) {
         // If beatmap isn't provided, ignore msg
         let args = getArgs(message);
 
@@ -368,8 +368,9 @@ async function _leaderboard(message) {
         let highest_pp = parseInt(String(plays[0])).toFixed(0);
 
         plays.sort((a, b) => b[sort] - a[sort]);
-
         let userbase = getUserbase();
+
+        plays = plays.slice(0, 50); // Limit leaderbaord to the top50
 
         if(!option.includes('all')) {
             let seen_users = [];
