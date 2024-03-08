@@ -366,7 +366,7 @@ async function addBestToDatabase(user) {
 }
 
 async function checkIfScore(activity, user) {
-    let scores = await findUR({map_id: activity.beatmap.id});
+    let scores = await findUR({ map_id: parseInt(activity.beatmap.id)});
 
     for(let score of scores) {
         if(score.user_id == user.id) {
