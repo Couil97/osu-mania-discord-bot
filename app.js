@@ -3,7 +3,7 @@ const { client } = require('./modules/discord-module');
 const { sendMsg } = require('./modules/helper-cmds-module');
 const { setToken } = require('./modules/osu-api-module');
 const { startTracker } = require('./modules/tracker-module');
-const { _track, _flush_tracker, _untrack, _compare, _link, _unlink, _activity, _help, _leaderboard, _ppat, _profile, _map, _scores } = require('./modules/user-commands-module');
+const { _track, _flush_tracker, _untrack, _compare, _link, _unlink, _activity, _help, _leaderboard, _ppat, _profile, _map, _scores, _multi } = require('./modules/user-commands-module');
 const { admin_roles, prefix, admins, discord_token } = require('./modules/variables');
 const os = require('os');
 
@@ -159,6 +159,13 @@ client.on('messageCreate', async function(message) {
         case 'score':
         case 's':
             await _scores(message);
+            break;
+        
+        // Adds multi role to user
+        // Args:
+        case 'multi':
+        case 'mul':
+            await _multi(message);
             break;
     }
 

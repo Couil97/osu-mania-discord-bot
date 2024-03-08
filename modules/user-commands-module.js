@@ -350,7 +350,7 @@ async function _leaderboard(message) {
         let beatmap_id = parseInt(args.beatmap_id);
 
         let plays = [];
-        
+
         if(mods.length > 0) plays = await findUR({ map_id: beatmap_id, mods: mods });
         else plays = await findUR({ map_id: beatmap_id });
         let scores_amt = plays.length;
@@ -762,6 +762,60 @@ async function _scores(message) {
     sendMsg(message.channel.id, EMB);
 }
 
+// ----- Role commands ------ //
+
+async function _multi (message) {
+    let args = getArgs(message);
+
+    let role_4k = message.guild.roles.cache.find(role => role.name === "Multi 4k???");
+    let role_7k = message.guild.roles.cache.find(role => role.name === "Multi 7k???");
+
+    if(!role_4k || !role_7k) {
+        sendMsg(message.channel.id, `No multi roles found in server!`);
+        return 0;
+    }
+
+    switch(args.variant) {
+        case '4k':
+            if(message.member.roles.cache.has(role_4k.id)) {
+                message.member.roles.remove(role_4k);
+
+                sendMsg(message.channel.id, `Removed 4k multi role from ${message.member.user.globalName}`);
+            } else {
+                message.member.roles.add(role_4k);
+                sendMsg(message.channel.id, `Added 4k multi role to ${message.member.user.globalName}`);
+            }
+            break;
+        case '7k':            
+            if(message.member.roles.cache.has(role_7k.id)) {
+                message.member.roles.remove(role_7k);
+                sendMsg(message.channel.id, `Removed 7k multi role from ${message.member.user.globalName}`);
+            } else {
+                message.member.roles.add(role_7k);
+                sendMsg(message.channel.id, `Added 7k multi role to ${message.member.user.globalName}`);
+            }
+        break;
+        default:
+            if(message.member.roles.cache.has(role_4k.id) || message.member.roles.cache.has(role_7k.id)) {
+                if(message.member.roles.cache.has(role_4k.id)) {
+                    message.member.roles.remove(role_4k);
+                }
+
+                if(message.member.roles.cache.has(role_7k.id)) {
+                    message.member.roles.remove(role_7k);
+                }
+
+                sendMsg(message.channel.id, `Removed multi roles from ${message.member.user.globalName}`);
+            } else {
+                message.member.roles.add(role_4k);
+                message.member.roles.add(role_7k);
+
+                sendMsg(message.channel.id, `Added multi roles to ${message.member.user.globalName}`);
+            }
+            break;
+    }
+}
+
 // --- Validation Commands --- //
 
 async function validateArgs(args, channel, cmd) {
@@ -820,4 +874,5 @@ module.exports = {
     "_profile": _profile,
     "_map": _map,
     "_scores": _scores,
+    "_multi": _multi,
 }
