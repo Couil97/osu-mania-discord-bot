@@ -309,7 +309,7 @@ async function updateUser(user, fetchUser) {
     }
 
     await setUserbase(userbase);
-    return 0;
+    return userbase[index];
 }
 
 // Get user info from database / from api

@@ -1,5 +1,5 @@
 const { findUR, updateUR, insertUR, getLowerPPBoundry, getPosition, updateUnrankedPerformancePoints } = require("./database-module");
-const { isEqual, toComma, sendMsg, delay, addToMsgStack } = require("./helper-cmds-module");
+const { isEqual, toComma, sendMsg, delay, addToMsgStack, toHours } = require("./helper-cmds-module");
 const { performanceCalc, performanceCalcMax } = require("./mania-calc-module");
 const { updateUser, getUser, getActivity, getRanking, needAttributes } = require("./osu-api-module");
 const { makeScore, makeEmbed } = require("./render-module");
@@ -18,7 +18,6 @@ async function startTracker() {
  */
 async function trackerLoop(args) {
     let current = 0, userbase = getUserbase();
-
     let start_time = Date.now();
 
     setInterval(async () => {
@@ -41,16 +40,12 @@ async function trackerLoop(args) {
             // Console logs
             let time = (Date.now() - start_time) / 1000 / 60;
 
-            console.log(`\n\nCalls:\t${(getApiUsageCount() / time).toFixed(2)} / min`);
             console.log('User:\t' + user.username);
-
-            if(time > 1) {
-                
-            }
+            console.log(`Calls:\t${(getApiUsageCount() / time).toFixed(2)} / min\n\n`);
 
             // Main tracker functions
             await tracker(user);
-    
+
             [current, userbase] = trackerIncrement(current, userbase);
         }
     }, tracker_rate);
@@ -74,66 +69,62 @@ async function checkUserWait(user) {
     if(!user.wait) user.wait = 1;
     user.wait--;
 
+    if(user.wait > 100) user.wait = 100; // Max user wait is 100 for now
     if(user.wait <= 0) {
-        let user_info = await getUser({user_id: user.id});
-        
-        let time_since = Date.now() - (user.session.activation_time || 0);
-
-        time_since /= 1000;                                 // Seconds
-        time_since /= 60;                                   // Minutes
-        time_since /= 60;                                   // Hours
-
-        let hours = time_since;
-
-        user.wait = 1 + Math.ceil(time_since / wait_cycle); // Wait cycle (hours)
-
         if(!Object.hasOwn(user, 'session')) {
             user.session = {};
-
-            user.session.active = false;
-
-            user.session.pp = 0;
-            user.session.global_rank = 0;
-            user.session.country_rank = 0;
-        }
-
-        if(user.session.active && hours >= session_end) {
-            user.session.active = false;
+            user.session.active = true;
 
             user.session.pp = 0;
             user.session.global_rank = 0;
             user.session.country_rank = 0;
+            user.session.last_score = Date.now();
         }
 
-        if(user.wait <= 0) user.wait = 1;
+        if(!Object.hasOwn(user.session, 'last_score')) user.session.last_score = Date.now();
+
+        let hours = toHours(Date.now() - user.session.last_score)
+
+        console.log(`Latest:\t${Math.ceil(hours)} hrs`);
+        user.wait = Math.ceil(hours / wait_cycle); // Wait cycle (hours)
+
+        if(hours >= session_end) user.session.active = false;
+        return 0;
+    }
+
+    return user.wait;
+}
+
+async function tracker(user) {
+    // Gets recent activity
+    let activities = await getActivity({user_id: user.id, type: 'recent'});
+    if(activities.length < 1) return 0
+
+    user.session.last_score = Date.parse(activities[0].created_at);
+
+    if(toHours(Date.now() - user.session.last_score) >= session_end) return 0;
+
+    if(!user.session.active) {
+        user.session.active = true;
 
         if(!Object.hasOwn(user, 'current')) user.current = {};
 
         user.current.global_rank = user.statistics.global_rank;
         user.current.country_rank = user.statistics.country_rank;
         user.current.pp = user.statistics.pp;
-        
-        await updateUser(user_info, false);
 
-        return 0;
-    } else return user.wait;
-}
-
-async function tracker(user) {
-    // Gets recent activity
-    let activities = await getActivity({user_id: user.id, type: 'recent'});
-    if(activities.length < 0) return 0
-
-    if(!Object.hasOwn(user, 'session')) user.session = {};
-
-    if(!user.session.active) {
-        user.session.active = true;
-        user.session.activation_time = Date.now();
+        console.log(`New session for ${user.username}: #${user.current.global_rank}, ${user.current.pp}pp\n\n`);
     }
 
-    user.session.global_rank -= user.statistics.global_rank - user.current.global_rank;
-    user.session.country_rank -= user.statistics.country_rank - user.current.country_rank;
-    user.session.pp += user.statistics.pp - user.current.pp;
+    let user_info = await getUser({user_id: user.id});
+    
+    user.statistics.global_rank = user_info.statistics.global_rank;
+    user.statistics.country_rank = user_info.statistics.country_rank;
+    user.statistics.pp = user_info.statistics.pp;
+
+    user.session.global_rank = user.statistics.global_rank - user.current.global_rank;
+    user.session.country_rank = user.statistics.country_rank - user.current.country_rank;
+    user.session.pp = user.statistics.pp - user.current.pp;
 
     await updateUser(user, false);
 
@@ -143,7 +134,6 @@ async function tracker(user) {
         await addPostedScores({score: activity.score, beatmap_id: activity.beatmap.id, user_id: user.id});
         await delay(1000);
     }
-
 }
 
 async function tracked_score(activity, user) {
@@ -283,7 +273,7 @@ function getDanInformation(activity) {
     }
 
     dan.passed = true;
-    dan.name = (dan_list[index].dan.add ? dan_list[index].dan.add : dan_rank + ' ' + dan_list[i].dan.type);
+    dan.name = (dan_list[index].dan.add ? dan_list[index].dan.add : dan_list[index].dan.rank + ' ' + dan_list[index].dan.type);
 
     return dan;
 }

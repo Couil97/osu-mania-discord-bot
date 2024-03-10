@@ -89,6 +89,10 @@ function toDays(date) {
     return `${seconds} s`;
 }
 
+function toHours(ms) {
+    return parseFloat(ms / 1000 / 60 / 60).toFixed(2);
+}
+
 // Checks if two arrays are equal
 function isEqual(arr1, arr2) {
     let a, b;
@@ -291,4 +295,5 @@ module.exports = {
     replaceNumbers: replaceNumbers,
     truncate: truncate,
     arraysEqual: arraysEqual,
+    toHours: toHours,
 }
