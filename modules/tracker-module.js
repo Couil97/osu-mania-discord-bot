@@ -117,7 +117,7 @@ async function tracker(user) {
     }
 
     let user_info = await getUser({user_id: user.id});
-    
+
     user.statistics.global_rank = user_info.statistics.global_rank;
     user.statistics.country_rank = user_info.statistics.country_rank;
     user.statistics.pp = user_info.statistics.pp;
