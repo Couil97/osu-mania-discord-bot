@@ -200,11 +200,12 @@ async function tracked_score(activity, user) {
     if(personal_best) pb_text = "\n> ```Improvment: " + (personal_best.score_diff > 0 ? '+' + toComma(personal_best.score_diff) : '' + toComma(personal_best.score_diff)) + ' score, ' + (personal_best.accuracy_diff > 0 ? '+' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2) : '' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2)) + '% ```';
 
     if(type == 'ranked') {
-        let pp_diff = (user.statistics.pp - user.current.pp).toFixed(2);
+        let pp_diff = (user.statistics.pp - user.current.previous_pp || user.current.pp).toFixed(2);
         if(pp_diff > 0) pp_diff = '+' + pp_diff;
 
         let session_pp = (user.session.pp > 0 ? '+' : '') + user.session.pp.toFixed(2);
         let session_global_rank = (user.session.global_rank > 0 ? '+' : '') + user.session.global_rank.toFixed(0);
+        user.current.previous_pp = user.statistics.pp;
 
         tracker_text = `\n> **#${toComma(user.current.global_rank)} → #${toComma(user.statistics.global_rank)}** (:flag_${user.country.code.toLowerCase()}:: #${toComma(user.current.country_rank)} → #${user.statistics.country_rank}) ${session_global_rank} ranks/sesh`;
         tracker_text += `\n> Total pp: **${(Math.round(user.statistics.pp * 100) / 100).toFixed(2)}** (${pp_diff}pp, ${session_pp}pp/sesh)\n> `
@@ -240,19 +241,24 @@ async function passedInRank(user) {
     let amount = user.current.country_rank - user.statistics.country_rank;
     let page = Math.ceil(user.current.country_rank / 50);
 
-    let ranking = await getRanking({country: 'SE', page: page, type: 'country'});
+    let rankings, start = 0;
+    if(user.current.country_rank % 50 < user.statistics.country_rank % 50) {
+        rankings = await getRanking({country: user.country_code, page: page-1});
+        rankings = await getRanking({country: user.country_code, page: page});
 
-    let post = '';
-    let start = user.current.country_rank - 2;
-    if(start < 1) start = 1;
-
-    for(let i = start; i < (user.current.country_rank + 1); i++) {
-        post += '[' + mode_text + '] **' + activity.user.username + '** passed **' + country.ranking[(i - 1) + userID.statistics.country_rank - ((page - 1) * 50)].user.username + '** achieving rank **#' + userID.statistics.global_rank + '** (#' + userID.statistics.country_rank + ' :flag_se:) \n'
+        start = 50 + user.current.country_rank % 50;
+    } else {
+        rankings = await getRanking({country: user.country_code, page: page});
+        start += user.current.country_rank % 50;
     }
 
-    if (num != -1) {
-        sendMsg('977965472169492560', '**+' + num + ' Country Ranks!**\n' + post)
+    post = `+${amount} Country ranks!\n\n`;
+
+    for(let i = start; i >= (start - amount); i--) {
+        post += `**${user.username}** passed **${rankings[i].user.username}** achieving rank: #${rankings[i].statistics.global_rank} (#${rankings[i].statistics.country_rank}:flag_${rankings[i].country_code.toLowerCase()}:)`;
     }
+    
+    if(amount > 0) sendMsg('977965472169492560', post);
 }
 
 function getDanInformation(activity) {
