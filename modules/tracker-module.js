@@ -200,7 +200,8 @@ async function tracked_score(activity, user) {
     if(personal_best) pb_text = "\n> ```Improvment: " + (personal_best.score_diff > 0 ? '+' + toComma(personal_best.score_diff) : '' + toComma(personal_best.score_diff)) + ' score, ' + (personal_best.accuracy_diff > 0 ? '+' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2) : '' + (Math.round((personal_best.accuracy_diff) * 10000) / 100).toFixed(2)) + '% ```';
 
     if(type == 'ranked') {
-        let pp_diff = (user.statistics.pp - user.current.previous_pp || user.current.pp).toFixed(2);
+        let prev_pp = (user.current.previous_pp || user.current.pp);
+        let pp_diff = (user.statistics.pp - prev_pp).toFixed(2);
         if(pp_diff > 0) pp_diff = '+' + pp_diff;
 
         let session_pp = (user.session.pp > 0 ? '+' : '') + user.session.pp.toFixed(2);

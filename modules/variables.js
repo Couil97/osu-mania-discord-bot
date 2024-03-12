@@ -52,7 +52,7 @@ const api_retry_rate = 5000;
 const tracker_rate = 2 * 1000;
 
 // Tracker wait cycle (hours)
-const wait_cycle = 6;
+const wait_cycle = 3;
 
 checkFiles();
     
